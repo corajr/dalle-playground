@@ -10,7 +10,9 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    restart: always
+    command: python3 app.py 8080 Mega
+    environment:
+      - CUDA_VISIBLE_DEVICES
     ports:
       - 8080:8080
     volumes:
@@ -25,7 +27,6 @@ services:
     build:
       context: ./interface
       dockerfile: Dockerfile
-    restart: always
     ports:
       - 3000:3000
     stdin_open: true
