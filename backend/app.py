@@ -2,7 +2,7 @@ import base64
 import sys
 from io import BytesIO
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, stream_with_context, jsonify
 from flask_cors import CORS, cross_origin
 from consts import ModelSize
 
@@ -22,15 +22,15 @@ def generate_images_api():
     num_images = json_data["num_images"]
     generated_imgs = dalle_model.generate_images(text_prompt, num_images)
 
-    generated_images = []
-    for img in generated_imgs:
-        buffered = BytesIO()
-        img.save(buffered, format="JPEG")
-        img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-        generated_images.append(img_str)
+    def generate():
+        for img in generated_imgs:
+            buffered = BytesIO()
+            img.save(buffered, format="JPEG")
+            img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+            yield json.dumps({"img": img_str}) + '\n'
 
-    print(f"Created {num_images} images from text prompt [{text_prompt}]")
-    return jsonify(generated_images)
+    print(f"Creating {num_images} images from text prompt [{text_prompt}]")
+    return app.response_class(stream_with_context(generate()), mimetype="application/x-ndjson")
 
 
 @app.route("/", methods=["GET"])

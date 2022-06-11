@@ -1,4 +1,6 @@
 /venv
-/wandb
+**/wandb
 /.vscode
 /backend/__pycache__
+/interface/build
+/interface/node_modules
