@@ -77,11 +77,10 @@ const App = ({classes}) => {
         console.log('API call to DALL-E web service with the following prompt [' + promptText + ']');
         setApiError('')
         setIsFetchingImgs(true)
-        setGeneratedImages([])
 	try {
 	    const stream = await callDalleService(backendUrl, promptText, imagesPerQuery);
 	    for await (const obj of stream) {
-                setGeneratedImages(images => [...images, obj["img"]])
+                setGeneratedImages(images => [obj["img"], ...images])
 		setIsFetchingImgs(false)
 	    }
 	} catch(error) {
