@@ -99,11 +99,15 @@ const App = ({classes}) => {
             return <Typography variant="h5" color="error">{apiError}</Typography>
         }
 
+	let spinner;
         if (isFetchingImgs) {
-            return <LoadingSpinner isLoading={isFetchingImgs}/>
+            spinner = <LoadingSpinner isLoading={isFetchingImgs}/>
         }
 
-        return <GeneratedImageList generatedImages={generatedImages}/>
+        return <div>
+		      <div><GeneratedImageList generatedImages={generatedImages}/></div>
+		    {spinner}
+	    </div>;
     }
 
     return (

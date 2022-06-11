@@ -3,7 +3,7 @@ import json
 import sys
 from io import BytesIO
 
-from flask import Flask, request, stream_with_context, jsonify
+from flask import Flask, request, send_file, stream_with_context, jsonify
 from flask_cors import CORS, cross_origin
 from consts import ModelSize
 
@@ -13,6 +13,19 @@ print("--> Starting DALL-E Server. This might take up to two minutes.")
 
 from dalle_model import DalleModel
 dalle_model = None
+
+
+@app.route("/img", methods=["GET"])
+@cross_origin()
+def generate_single_image():
+    args = request.args
+    text_prompt = args.get("text")
+    img = next(dalle_model.generate_images(text_prompt, 1))
+
+    buffered = BytesIO()
+    img.save(buffered, format="JPEG")
+    buffered.seek(0)
+    return send_file(buffered, mimetype="image/jpeg")
 
 
 @app.route("/dalle", methods=["POST"])
