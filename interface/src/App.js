@@ -73,15 +73,18 @@ const App = ({classes}) => {
     const imagesPerQueryOptions = 10
     const validBackendUrl = isValidBackendEndpoint && backendUrl
 
-    function enterPressedCallback(promptText) {
+    async function enterPressedCallback(promptText) {
         console.log('API call to DALL-E web service with the following prompt [' + promptText + ']');
         setApiError('')
         setIsFetchingImgs(true)
-        callDalleService(backendUrl, promptText, imagesPerQuery).then((response) => {
-            setQueryTime(response['executionTime'])
-            setGeneratedImages(response['generatedImgs'])
-            setIsFetchingImgs(false)
-        }).catch((error) => {
+        setGeneratedImages([])
+	try {
+	    const stream = await callDalleService(backendUrl, promptText, imagesPerQuery);
+	    for await (const obj of stream) {
+                setGeneratedImages(images => [...images, obj["img"]])
+		setIsFetchingImgs(false)
+	    }
+	} catch(error) {
             console.log('Error querying DALL-E service.', error)
             if (error.message === 'Timeout') {
                 setApiError('Timeout querying DALL-E service (>1min). Consider reducing the images per query or use a stronger backend.')
@@ -89,7 +92,7 @@ const App = ({classes}) => {
                 setApiError('Error querying DALL-E service. Check your backend server logs.')
             }
             setIsFetchingImgs(false)
-        })
+        }
     }
 
     function getGalleryContent() {
@@ -134,7 +137,7 @@ const App = ({classes}) => {
                             <FormControl className={classes.imagesPerQueryControl}
                                          variant="outlined">
                                 <InputLabel id="images-per-query-label">
-                                    Images to generate
+                                    Images per query
                                 </InputLabel>
                                 <Select labelId="images-per-query-label"
                                         label="Images per query" value={imagesPerQuery}

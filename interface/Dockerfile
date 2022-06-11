@@ -4,12 +4,12 @@ EXPOSE 3000
 
 COPY package.json /code/package.json
 
-COPY package-lock.json /code/package-lock.json
+COPY yarn.lock /code/yarn.lock
 
 WORKDIR /code
 
 COPY . /code
 
-RUN npm install
+RUN yarn
 
-CMD npm start
+CMD yarn start
